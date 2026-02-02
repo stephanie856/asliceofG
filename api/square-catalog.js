@@ -90,11 +90,17 @@ module.exports = async (req, res) => {
           imageUrl = images[itemData.imageIds[0]];
         }
         
+        // Convert BigInt to Number for JSON serialization
+        let price = 0;
+        if (variationData.priceMoney && variationData.priceMoney.amount) {
+          price = Number(variationData.priceMoney.amount);
+        }
+        
         const product = {
           id: item.id,
           name: itemData.name || 'Unnamed Product',
           description: itemData.description || '',
-          price: variationData.priceMoney ? variationData.priceMoney.amount : 0,
+          price: price,
           currency: variationData.priceMoney ? variationData.priceMoney.currency : 'USD',
           category: categoryName,
           imageUrl: imageUrl,

@@ -60,7 +60,7 @@ module.exports = async (req, res) => {
       payment: {
         id: result.payment.id,
         status: result.payment.status,
-        amount: result.payment.amountMoney.amount.toString(),
+        amount: Number(result.payment.amountMoney.amount),
         currency: result.payment.amountMoney.currency,
         receiptUrl: result.payment.receiptUrl
       }
