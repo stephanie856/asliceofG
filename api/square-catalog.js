@@ -98,6 +98,20 @@ module.exports = async (req, res) => {
           return; // Skip this item
         }
         
+        // Only include featured items on homepage
+        const featuredItems = [
+          'valentines gift boxes',
+          'the hidden treasure',
+          'the gift of g'
+        ];
+        
+        const itemNameLower = (itemData.name || '').toLowerCase();
+        const isFeatured = featuredItems.some(featured => itemNameLower.includes(featured));
+        
+        if (!isFeatured) {
+          return; // Skip non-featured items
+        }
+        
         // Image
         let imageUrl = null;
         if (itemData.imageIds && itemData.imageIds.length > 0) {
