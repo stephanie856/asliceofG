@@ -55,20 +55,41 @@ module.exports = async (req, res) => {
     console.log('Fulfillment type:', fulfillmentType);
 
     // Step 1: Build line items for the order
-    // Use catalogObjectId which should be the CatalogItemVariation ID
+    // https://developer.squareup.com/docs/orders-api/create-orders
     const lineItems = items.map(item => {
-      // Square requires catalogObjectId to be the item variation ID
-      // This must match an existing item in your Square catalog
+      // Square requires catalogObjectId to be the CatalogItemVariation ID
       const catalogObjectId = item.variationId || item.id;
       
       if (!catalogObjectId) {
         throw new Error(`Item ${item.name} is missing required variation ID`);
       }
 
-      return {
+      // Build line item with modifiers
+      const lineItem = {
         quantity: String(item.quantity),
         catalogObjectId: catalogObjectId
       };
+
+      // Add modifiers if selected
+      if (item.modifiers && item.modifiers.length > 0) {
+        lineItem.modifiers = item.modifiers.map(mod => ({
+          catalogObjectId: mod.id
+        }));
+      }
+
+      // Add note with variation name and modifiers for clarity
+      const parts = [];
+      if (item.variationName && item.variationName !== 'Default') {
+        parts.push(item.variationName);
+      }
+      if (item.modifiers && item.modifiers.length > 0) {
+        parts.push(item.modifiers.map(m => m.name).join(', '));
+      }
+      if (parts.length > 0) {
+        lineItem.note = parts.join(' - ');
+      }
+
+      return lineItem;
     });
 
     console.log('Line items for order:', JSON.stringify(lineItems, null, 2));
