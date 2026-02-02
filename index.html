@@ -996,8 +996,8 @@
                 <p class="subtitle">A Slice of G - Where Tradition Meets Innovation</p>
                 <p>Experience our signature rum-infused cakes and cookies that break the mold. Handcrafted with premium Caribbean rum and the finest ingredients, each creation is a delicious rebellion against the ordinary.</p>
                 <div class="cta-buttons">
-                    <a href="#products" class="btn btn-primary">Shop Our Collection</a>
-                    <a href="#about" class="btn btn-secondary">Our Story</a>
+                    <a href="#featured" class="btn btn-primary">Shop Featured</a>
+                    <a href="#products" class="btn btn-secondary">View All</a>
                 </div>
             </div>
             <div class="hero-image">
@@ -1005,6 +1005,17 @@
                     <!-- Replace with actual image: <img src="your-hero-image.jpg" alt="A Slice of G Cake"> -->
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section id="featured">
+        <div class="section-header scroll-reveal">
+            <h2>Featured Products</h2>
+            <p>Our most loved creations, handpicked for you</p>
+        </div>
+        <div class="products-grid" id="featuredGrid">
+            <!-- Featured products will be loaded here -->
         </div>
     </section>
 
@@ -1507,7 +1518,22 @@
                     return;
                 }
                 
-                // Group products by category
+                // Featured items (only these 3 show on homepage featured section)
+                const featuredNames = [
+                    'valentines day treat box',
+                    'the hidden treasure', 
+                    'the gift of g'
+                ];
+                
+                const featuredProducts = data.products.filter(product => {
+                    const nameLower = (product.name || '').toLowerCase();
+                    return featuredNames.some(featured => nameLower.includes(featured));
+                });
+                
+                // Render featured products
+                renderProductsByCategory('featured', featuredProducts);
+                
+                // Group ALL products by category for category pages
                 const categorizedProducts = {
                     'Rum Infused Bites': [],
                     'Accessories': [],
@@ -1522,7 +1548,7 @@
                     }
                 });
                 
-                // Render products by category
+                // Render ALL products by category
                 renderProductsByCategory('products', categorizedProducts['Rum Infused Bites']);
                 renderProductsByCategory('accessories', categorizedProducts['Accessories']);
                 renderProductsByCategory('dinner-parties', categorizedProducts['Dinner Parties']);
@@ -1536,6 +1562,7 @@
         
         function renderProductsByCategory(sectionId, products) {
             const gridMap = {
+                'featured': 'featuredGrid',
                 'products': 'productsGrid',
                 'accessories': 'accessoriesGrid',
                 'dinner-parties': 'dinnerPartiesGrid',
