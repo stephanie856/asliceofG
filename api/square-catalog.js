@@ -15,21 +15,40 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('Environment:', process.env.SQUARE_ENVIRONMENT || 'not set');
+    // Determine environment - defaults to Production
+    const envSetting = process.env.SQUARE_ENVIRONMENT || 'production';
+    const isProduction = envSetting !== 'sandbox';
+    
+    console.log('=== SQUARE CATALOG DEBUG ===');
+    console.log('Environment setting:', envSetting);
+    console.log('Is Production:', isProduction);
+    console.log('Location ID:', process.env.SQUARE_LOCATION_ID);
     console.log('Token exists:', !!process.env.SQUARE_ACCESS_TOKEN);
+    console.log('Token length:', process.env.SQUARE_ACCESS_TOKEN?.length);
 
-    // Initialize Square client - defaults to Production
-    const isProduction = !process.env.SQUARE_ENVIRONMENT || process.env.SQUARE_ENVIRONMENT === 'production';
+    // Initialize Square client
     const client = new Client({
       accessToken: process.env.SQUARE_ACCESS_TOKEN,
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
     // Fetch catalog items
-    const { result } = await client.catalogApi.listCatalog(
-      undefined, // cursor
-      'ITEM,CATEGORY,IMAGE' // types to include
-    );
+    let result;
+    try {
+      const response = await client.catalogApi.listCatalog(
+        undefined, // cursor
+        'ITEM,CATEGORY,IMAGE' // types to include
+      );
+      result = response.result;
+      console.log('Square API call successful');
+    } catch (apiError) {
+      console.error('Square API Error:', apiError.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Square API Error: ' + apiError.message,
+        debug: { envSetting, isProduction }
+      });
+    }
 
     console.log('Total objects from Square:', result.objects?.length || 0);
 
@@ -41,99 +60,110 @@ module.exports = async (req, res) => {
     if (result.objects) {
       result.objects.forEach(obj => {
         if (obj.type === 'CATEGORY') {
-          categories[obj.id] = obj.categoryData.name;
+          categories[obj.id] = obj.categoryData?.name;
         } else if (obj.type === 'IMAGE') {
-          images[obj.id] = obj.imageData.url;
+          images[obj.id] = obj.imageData?.url;
         }
       });
     }
 
-    console.log('Categories found:', Object.keys(categories).length);
+    console.log('Categories found:', Object.keys(categories));
     console.log('Images found:', Object.keys(images).length);
 
-    // Second pass: process items and assign categories
+    // Second pass: process items
     const products = [];
     const allItems = [];
+    const rawItems = [];
     
     if (result.objects) {
-      result.objects
-        .filter(obj => obj.type === 'ITEM')
-        .forEach(item => {
-          const itemData = item.itemData;
-          
-          // Debug logging
-          console.log('Processing item:', {
-            name: itemData?.name,
-            isDeleted: itemData?.isDeleted,
-            availableOnline: itemData?.availableOnline,
-            availableElectronically: itemData?.availableElectronically,
-            variations: itemData?.variations?.length || 0
-          });
-          
-          // Get the first variation (most items have one variation)
-          const variation = itemData?.variations?.[0];
-          const variationData = variation?.itemVariationData;
-          
-          // Determine category name
-          let categoryName = 'Rum Infused Bites'; // Default category
-          
-          if (itemData?.categoryId && categories[itemData.categoryId]) {
-            categoryName = categories[itemData.categoryId];
-          }
-          
-          // Map Square categories to your site sections
-          if (categoryName.toLowerCase().includes('accessor') || 
-              categoryName.toLowerCase().includes('card') || 
-              categoryName.toLowerCase().includes('tag')) {
-            categoryName = 'Accessories';
-          } else if (categoryName.toLowerCase().includes('cake') || 
-                     categoryName.toLowerCase().includes('cookie') ||
-                     categoryName.toLowerCase().includes('rum') ||
-                     categoryName.toLowerCase().includes('bite')) {
-            categoryName = 'Rum Infused Bites';
-          }
-          
-          // Get image URL
-          let imageUrl = null;
-          if (itemData?.imageIds && itemData.imageIds.length > 0) {
-            imageUrl = images[itemData.imageIds[0]];
-          }
-          
-          const product = {
-            id: item.id,
-            name: itemData?.name,
-            description: itemData?.description || '',
-            price: variationData?.priceMoney?.amount || 0,
-            currency: variationData?.priceMoney?.currency || 'USD',
-            category: categoryName,
-            imageUrl: imageUrl,
-            available: !itemData?.isDeleted && itemData?.availableOnline !== false
-          };
-          
-          allItems.push(product);
-          
-          // Only add available products
-          if (product.available) {
-            products.push(product);
-          }
+      const items = result.objects.filter(obj => obj.type === 'ITEM');
+      console.log('Items found:', items.length);
+      
+      items.forEach(item => {
+        const itemData = item.itemData || {};
+        
+        // Store raw data for debugging
+        rawItems.push({
+          id: item.id,
+          name: itemData.name,
+          isDeleted: itemData.isDeleted,
+          availableOnline: itemData.availableOnline,
+          availableElectronically: itemData.availableElectronically,
+          categoryId: itemData.categoryId,
+          variationsCount: itemData.variations?.length || 0
         });
+        
+        // Check availability
+        const isDeleted = itemData.isDeleted === true;
+        const availableOnline = itemData.availableOnline !== false; // defaults to true if not set
+        
+        console.log(`Item: ${itemData.name} | isDeleted: ${isDeleted} | availableOnline: ${availableOnline}`);
+        
+        // Get the first variation
+        const variation = itemData.variations?.[0];
+        const variationData = variation?.itemVariationData || {};
+        
+        // Determine category
+        let categoryName = 'Rum Infused Bites';
+        if (itemData.categoryId && categories[itemData.categoryId]) {
+          categoryName = categories[itemData.categoryId];
+        }
+        
+        // Map to site categories
+        const catLower = categoryName.toLowerCase();
+        if (catLower.includes('accessor') || catLower.includes('card') || catLower.includes('tag')) {
+          categoryName = 'Accessories';
+        } else if (catLower.includes('cake') || catLower.includes('cookie') || 
+                   catLower.includes('rum') || catLower.includes('bite')) {
+          categoryName = 'Rum Infused Bites';
+        }
+        
+        // Get image URL
+        let imageUrl = null;
+        if (itemData.imageIds?.length > 0) {
+          imageUrl = images[itemData.imageIds[0]];
+        }
+        
+        const product = {
+          id: item.id,
+          name: itemData.name,
+          description: itemData.description || '',
+          price: variationData.priceMoney?.amount || 0,
+          currency: variationData.priceMoney?.currency || 'USD',
+          category: categoryName,
+          imageUrl: imageUrl,
+          available: !isDeleted && availableOnline
+        };
+        
+        allItems.push(product);
+        
+        if (product.available) {
+          products.push(product);
+          console.log(`  -> ADDED to available products`);
+        } else {
+          console.log(`  -> FILTERED OUT (deleted: ${isDeleted}, online: ${availableOnline})`);
+        }
+      });
     }
 
-    console.log('All items found:', allItems.length);
-    console.log('Available items:', products.length);
+    console.log('=== SUMMARY ===');
+    console.log('All items:', allItems.length);
+    console.log('Available:', products.length);
 
     res.status(200).json({
       success: true,
       products: products,
       totalItems: products.length,
       debug: {
-        environment: process.env.SQUARE_ENVIRONMENT || 'not set',
+        environment: envSetting,
+        isProduction: isProduction,
+        locationId: process.env.SQUARE_LOCATION_ID,
         totalObjects: result.objects?.length || 0,
-        allItemsCount: allItems.length,
-        filteredOutCount: allItems.length - products.length,
-        filteredOutReasons: allItems.filter(p => !p.available).map(p => ({ 
+        rawItemsCount: rawItems.length,
+        rawItems: rawItems,
+        filteredOut: allItems.filter(p => !p.available).map(p => ({ 
           name: p.name, 
-          available: p.available 
+          reason: 'deleted or not available online'
         }))
       }
     });
@@ -142,7 +172,8 @@ module.exports = async (req, res) => {
     console.error('Square Catalog API Error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to fetch products from Square'
+      error: error.message || 'Failed to fetch products from Square',
+      stack: error.stack
     });
   }
 };
