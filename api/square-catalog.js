@@ -93,9 +93,17 @@ module.exports = async (req, res) => {
           categoryName = 'Catering';
         }
         
+        // Log items that don't match for debugging
+        if (!categoryName) {
+          console.log('Item without matching category:', itemData.name, '- Original category:', originalCategory);
+          // Default to Rum Infused Bites if no category match
+          categoryName = 'Rum Infused Bites';
+        }
+        
         // Skip items that don't match any allowed category
-        if (!categoryName || !allowedCategories.includes(categoryName)) {
-          return; // Skip this item
+        if (!allowedCategories.includes(categoryName)) {
+          console.log('Skipping item - category not allowed:', itemData.name, categoryName);
+          return;
         }
         
         // Image
