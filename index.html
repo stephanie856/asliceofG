@@ -1556,7 +1556,8 @@
                 
             } catch (error) {
                 console.error('Error loading Square products:', error);
-                // Fallback to placeholder products if API fails
+                // Keep placeholder products if API fails
+                console.log('API failed, keeping placeholder products');
             }
         }
         
@@ -1604,10 +1605,19 @@
         }
         
         // Initialize Square on page load
-        // Uncomment these when you have your Square credentials configured
         window.addEventListener('load', () => {
+            console.log('Page loaded, initializing...');
             initializeSquarePayments();
             loadSquareProducts();
+            
+            // Debug: Check if sections exist
+            console.log('Sections found:', {
+                featured: document.getElementById('featuredGrid'),
+                products: document.getElementById('productsGrid'),
+                accessories: document.getElementById('accessoriesGrid'),
+                dinnerParties: document.getElementById('dinnerPartiesGrid'),
+                catering: document.getElementById('cateringGrid')
+            });
         });
     </script>
 </body>
