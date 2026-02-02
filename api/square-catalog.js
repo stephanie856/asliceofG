@@ -15,6 +15,9 @@ module.exports = async (req, res) => {
   }
 
   try {
+    console.log('Environment:', process.env.SQUARE_ENVIRONMENT || 'not set');
+    console.log('Token exists:', !!process.env.SQUARE_ACCESS_TOKEN);
+
     // Initialize Square client
     const client = new Client({
       accessToken: process.env.SQUARE_ACCESS_TOKEN,
@@ -28,6 +31,8 @@ module.exports = async (req, res) => {
       undefined, // cursor
       'ITEM,CATEGORY,IMAGE' // types to include
     );
+
+    console.log('Total objects from Square:', result.objects?.length || 0);
 
     // Create lookup maps
     const categories = {};
@@ -44,8 +49,12 @@ module.exports = async (req, res) => {
       });
     }
 
+    console.log('Categories found:', Object.keys(categories).length);
+    console.log('Images found:', Object.keys(images).length);
+
     // Second pass: process items and assign categories
     const products = [];
+    const allItems = [];
     
     if (result.objects) {
       result.objects
@@ -53,19 +62,27 @@ module.exports = async (req, res) => {
         .forEach(item => {
           const itemData = item.itemData;
           
+          // Debug logging
+          console.log('Processing item:', {
+            name: itemData?.name,
+            isDeleted: itemData?.isDeleted,
+            availableOnline: itemData?.availableOnline,
+            availableElectronically: itemData?.availableElectronically,
+            variations: itemData?.variations?.length || 0
+          });
+          
           // Get the first variation (most items have one variation)
-          const variation = itemData.variations?.[0];
+          const variation = itemData?.variations?.[0];
           const variationData = variation?.itemVariationData;
           
           // Determine category name
           let categoryName = 'Rum Infused Bites'; // Default category
           
-          if (itemData.categoryId && categories[itemData.categoryId]) {
+          if (itemData?.categoryId && categories[itemData.categoryId]) {
             categoryName = categories[itemData.categoryId];
           }
           
           // Map Square categories to your site sections
-          // You can customize this mapping based on your Square category names
           if (categoryName.toLowerCase().includes('accessor') || 
               categoryName.toLowerCase().includes('card') || 
               categoryName.toLowerCase().includes('tag')) {
@@ -79,30 +96,47 @@ module.exports = async (req, res) => {
           
           // Get image URL
           let imageUrl = null;
-          if (itemData.imageIds && itemData.imageIds.length > 0) {
+          if (itemData?.imageIds && itemData.imageIds.length > 0) {
             imageUrl = images[itemData.imageIds[0]];
           }
           
-          products.push({
+          const product = {
             id: item.id,
-            name: itemData.name,
-            description: itemData.description || '',
+            name: itemData?.name,
+            description: itemData?.description || '',
             price: variationData?.priceMoney?.amount || 0,
             currency: variationData?.priceMoney?.currency || 'USD',
             category: categoryName,
             imageUrl: imageUrl,
-            available: !itemData.isDeleted && itemData.availableOnline !== false
-          });
+            available: !itemData?.isDeleted && itemData?.availableOnline !== false
+          };
+          
+          allItems.push(product);
+          
+          // Only add available products
+          if (product.available) {
+            products.push(product);
+          }
         });
     }
 
-    // Filter out unavailable products
-    const availableProducts = products.filter(p => p.available);
+    console.log('All items found:', allItems.length);
+    console.log('Available items:', products.length);
 
     res.status(200).json({
       success: true,
-      products: availableProducts,
-      totalItems: availableProducts.length
+      products: products,
+      totalItems: products.length,
+      debug: {
+        environment: process.env.SQUARE_ENVIRONMENT || 'not set',
+        totalObjects: result.objects?.length || 0,
+        allItemsCount: allItems.length,
+        filteredOutCount: allItems.length - products.length,
+        filteredOutReasons: allItems.filter(p => !p.available).map(p => ({ 
+          name: p.name, 
+          available: p.available 
+        }))
+      }
     });
 
   } catch (error) {
