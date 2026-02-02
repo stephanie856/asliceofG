@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
         name: items.map(i => i.name).join(', ').substring(0, 255),
         priceMoney: {
           amount: BigInt(items.reduce((sum, item) => sum + (item.price * item.quantity), 0)),
-          currency: 'USD'
+          currency: 'CAD'
         },
         locationId: locationId
       },
@@ -103,7 +103,7 @@ module.exports = async (req, res) => {
       orderId: result.paymentLink.orderId,
       total: {
         amount: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
-        currency: 'USD'
+        currency: 'CAD'
       }
     });
 

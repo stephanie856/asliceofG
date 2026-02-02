@@ -118,7 +118,7 @@ module.exports = async (req, res) => {
           name: itemData.name || 'Unnamed Product',
           description: itemData.description || '',
           price: price,
-          currency: variationData.priceMoney ? variationData.priceMoney.currency : 'USD',
+          currency: variationData.priceMoney ? variationData.priceMoney.currency : 'CAD',
           category: categoryName,
           imageUrl: imageUrl,
           available: !isDeleted && availableOnline
