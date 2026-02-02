@@ -1,6 +1,4 @@
-// api/create-checkout.js
-// Creates a Square checkout with fulfillment options (shipping, pickup)
-
+// api/create-checkout.js - Simplified checkout using Square Payment Links
 const { Client, Environment } = require('square');
 const { randomUUID } = require('crypto');
 
@@ -9,13 +7,8 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ success: false, error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
 
   try {
     const { items, fulfillmentType, email, note } = req.body;
@@ -38,97 +31,79 @@ module.exports = async (req, res) => {
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Build line items for the order
-    const lineItems = items.map(item => ({
-      quantity: String(item.quantity),
-      catalogObjectId: item.id, // Square catalog item ID
-      itemType: 'ITEM'
-    }));
-
-    // Build fulfillment based on type
-    let fulfillment = null;
-    if (fulfillmentType === 'PICKUP') {
-      fulfillment = {
-        pickupDetails: {
-          recipient: {
-            emailAddress: email || ''
-          },
-          note: note || '',
-          scheduleType: 'ASAP' // or 'SCHEDULED' with pickupAt timestamp
-        },
-        state: 'PROPOSED',
-        type: 'PICKUP'
+    // Build line items using item variation IDs
+    const lineItems = items.map(item => {
+      // Use variation ID if available, otherwise use item ID
+      const catalogObjectId = item.variationId || item.id;
+      return {
+        quantity: String(item.quantity),
+        catalogObjectId: catalogObjectId
       };
-    } else if (fulfillmentType === 'SHIPMENT') {
-      fulfillment = {
-        shipmentDetails: {
-          recipient: {
-            emailAddress: email || ''
-          },
-          note: note || ''
-        },
-        state: 'PROPOSED',
-        type: 'SHIPMENT'
-      };
-    }
-
-    // Create the order
-    const orderRequest = {
-      idempotencyKey: randomUUID(),
-      order: {
-        locationId: locationId,
-        lineItems: lineItems,
-        ...(fulfillment && { fulfillments: [fulfillment] })
-      }
-    };
-
-    console.log('Creating order:', JSON.stringify(orderRequest, null, 2));
-
-    const { result: orderResult } = await client.ordersApi.createOrder(orderRequest);
-    const orderId = orderResult.order.id;
-    const totalMoney = orderResult.order.totalMoney;
-
-    console.log('Order created:', orderId, 'Total:', totalMoney);
-
-    // Create Square checkout link
-    const checkoutRequest = {
-      idempotencyKey: randomUUID(),
-      order: {
-        locationId: locationId,
-        lineItems: lineItems
-      },
-      merchantSupportEmail: 'stephanie@asliceofg.com',
-      askForShippingAddress: fulfillmentType === 'SHIPMENT',
-      prePopulateBuyerEmail: email || undefined,
-      note: note || undefined
-    };
-
-    // For production, use Square Checkout API or Payment Links
-    // Since Checkout API creates a Square-hosted page, let's use Payment Links API
-    const { result: linkResult } = await client.checkoutApi.createPaymentLink({
-      idempotencyKey: randomUUID(),
-      order: {
-        locationId: locationId,
-        lineItems: lineItems
-      },
-      checkoutOptions: {
-        merchantSupportEmail: 'stephanie@asliceofg.com',
-        askForShippingAddress: fulfillmentType === 'SHIPMENT',
-        allowTipping: true,
-        redirectUrl: `${req.headers.origin || 'https://asliceof-g.vercel.app'}/order-complete`
-      },
-      description: 'A Slice of G Order'
     });
 
-    console.log('Payment link created:', linkResult.paymentLink);
+    console.log('Creating checkout with items:', JSON.stringify(lineItems, null, 2));
+
+    // Create Payment Link (simpler than full order + checkout)
+    const paymentLinkRequest = {
+      idempotencyKey: randomUUID(),
+      quickPay: {
+        name: items.map(i => i.name).join(', ').substring(0, 255),
+        priceMoney: {
+          amount: BigInt(items.reduce((sum, item) => sum + (item.price * item.quantity), 0)),
+          currency: 'USD'
+        },
+        locationId: locationId
+      },
+      checkoutOptions: {
+        redirectUrl: `${req.headers.origin || 'https://asliceof-g.vercel.app'}`,
+        merchantSupportEmail: 'stephanie@asliceofg.com',
+        askForShippingAddress: fulfillmentType === 'SHIPMENT',
+        acceptedPaymentMethods: {
+          applePay: true,
+          googlePay: true,
+          cashAppPay: true,
+          afterpayClearpay: false
+        }
+      },
+      description: note || `Order from A Slice of G - ${fulfillmentType}`
+    };
+
+    // If we have valid catalog items, use them; otherwise use quickPay
+    let result;
+    try {
+      // Try to create with catalog items first
+      const orderLineItems = items.map(item => ({
+        quantity: String(item.quantity),
+        catalogObjectId: item.id
+      }));
+      
+      result = await client.checkoutApi.createPaymentLink({
+        idempotencyKey: randomUUID(),
+        order: {
+          locationId: locationId,
+          lineItems: orderLineItems
+        },
+        checkoutOptions: {
+          redirectUrl: `${req.headers.origin || 'https://asliceof-g.vercel.app'}`,
+          merchantSupportEmail: 'stephanie@asliceofg.com',
+          askForShippingAddress: fulfillmentType === 'SHIPMENT'
+        }
+      });
+    } catch (orderError) {
+      // Fall back to quickPay if catalog items fail
+      console.log('Catalog order failed, using quickPay:', orderError.message);
+      result = await client.checkoutApi.createPaymentLink(paymentLinkRequest);
+    }
+
+    console.log('Payment link created:', result.paymentLink.url);
 
     res.status(200).json({
       success: true,
-      checkoutUrl: linkResult.paymentLink.url,
-      orderId: orderId,
+      checkoutUrl: result.paymentLink.url,
+      orderId: result.paymentLink.orderId,
       total: {
-        amount: Number(totalMoney.amount),
-        currency: totalMoney.currency
+        amount: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        currency: 'USD'
       }
     });
 
@@ -136,14 +111,17 @@ module.exports = async (req, res) => {
     console.error('Checkout Error:', error);
     
     let errorMessage = 'Failed to create checkout';
+    let details = error.message;
+    
     if (error.errors && error.errors.length > 0) {
       errorMessage = error.errors[0].detail || errorMessage;
+      details = JSON.stringify(error.errors);
     }
 
     res.status(500).json({
       success: false,
       error: errorMessage,
-      details: error.message
+      details: details
     });
   }
 };

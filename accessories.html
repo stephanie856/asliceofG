@@ -220,17 +220,23 @@
                 const products = data.products.filter(p => p.category === 'Gift Wrap Accessories');
                 const grid = document.getElementById('productsGrid');
                 if (products.length === 0) { grid.innerHTML = '<p style="text-align:center;color:#999;">No accessories found.</p>'; return; }
-                grid.innerHTML = products.map(p => `
+                grid.innerHTML = products.map(p => {
+                    const shortDesc = p.description 
+                        ? p.description.length > 80 
+                            ? p.description.substring(0, 80) + '...' 
+                            : p.description
+                        : '';
+                    return `
                     <div class="product-card">
                         <div class="product-image">${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : 'Product Image'}</div>
                         <div class="product-info">
                             <h3>${p.name}</h3>
-                            <p>${p.description || ''}</p>
+                            <p style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 2;">${shortDesc}</p>
                             <div class="product-price">$${(p.price / 100).toFixed(2)}</div>
                             <button class="btn btn-primary" onclick='addToCart(${JSON.stringify(p).replace(/'/g, "&#39;")})'>Add to Cart</button>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             } catch (e) { console.error(e); }
         }
         loadProducts(); updateCart();

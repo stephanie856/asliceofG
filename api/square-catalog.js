@@ -87,27 +87,20 @@ module.exports = async (req, res) => {
         let categoryName = null;
         
         // Map Square categories to site categories - STRICT matching
-        if (catLower === 'gift wrap accessories' || catLower.includes('gift wrap')) {
-          categoryName = 'Gift Wrap Accessories';
-        } else if (catLower === 'rum infused bites' || catLower.includes('rum infused')) {
+        if (catLower === 'rum infused bites' || catLower === 'ruminfusedbites' || catLower.includes('rum infused bite')) {
           categoryName = 'Rum Infused Bites';
-        } else if (catLower === 'dinner parties' || catLower.includes('dinner party')) {
+        } else if (catLower === 'gift wrap accessories' || catLower === 'giftwrapaccessories' || catLower.includes('gift wrap')) {
+          categoryName = 'Gift Wrap Accessories';
+        } else if (catLower === 'dinner parties' || catLower === 'dinnerparties' || catLower.includes('dinner party')) {
           categoryName = 'Dinner Parties';
-        } else if (catLower === 'catering' || catLower.includes('catering')) {
+        } else if (catLower === 'catering') {
           categoryName = 'Catering';
         }
         
         // Log items that don't match for debugging
         if (!categoryName) {
-          console.log('Item without matching category:', itemData.name, '- Original category:', originalCategory);
-          // Default to Rum Infused Bites if no category match
-          categoryName = 'Rum Infused Bites';
-        }
-        
-        // Skip items that don't match any allowed category
-        if (!allowedCategories.includes(categoryName)) {
-          console.log('Skipping item - category not allowed:', itemData.name, categoryName);
-          return;
+          console.log('Skipping item without matching category:', itemData.name, '- Original category:', originalCategory);
+          return; // Skip items without proper category
         }
         
         // Image
