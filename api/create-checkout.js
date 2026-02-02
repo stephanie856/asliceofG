@@ -113,14 +113,58 @@ module.exports = async (req, res) => {
     }
 
     // Add fulfillments if fulfillment type is specified
-    // This enables pickup or shipping options in checkout
+    // https://developer.squareup.com/docs/orders-api/fulfillments
     if (fulfillmentType) {
-      orderRequest.order.fulfillments = [
-        {
-          type: fulfillmentType, // 'PICKUP' or 'SHIPMENT'
-          state: 'PROPOSED'
+      const fulfillment = {
+        type: fulfillmentType,
+        state: 'PROPOSED'
+      };
+
+      // Add required details based on fulfillment type
+      if (fulfillmentType === 'PICKUP') {
+        // PICKUP requires pickup_details with recipient
+        // https://developer.squareup.com/docs/orders-api/fulfillments#pickup-type-fulfillment
+        fulfillment.pickupDetails = {
+          scheduleType: 'ASAP',
+          recipient: email ? { 
+            emailAddress: email,
+            displayName: email.split('@')[0] // Use email username as display name
+          } : {
+            displayName: 'Customer' // Required field
+          }
+        };
+
+        // If pickup date is provided, use SCHEDULED type
+        const pickupDate = items.find(i => i.pickupDate)?.pickupDate;
+        if (pickupDate) {
+          fulfillment.pickupDetails.scheduleType = 'SCHEDULED';
+          fulfillment.pickupDetails.pickupAt = pickupDate;
         }
-      ];
+
+        // Add note if provided
+        if (note) {
+          fulfillment.pickupDetails.note = note;
+        }
+
+      } else if (fulfillmentType === 'SHIPMENT') {
+        // SHIPMENT requires shipment_details with recipient
+        // https://developer.squareup.com/docs/orders-api/fulfillments#shipment-type-fulfillment
+        fulfillment.shipmentDetails = {
+          recipient: email ? { 
+            emailAddress: email,
+            displayName: email.split('@')[0]
+          } : {
+            displayName: 'Customer'
+          }
+        };
+
+        // Add note if provided
+        if (note) {
+          fulfillment.shipmentDetails.shippingNote = note;
+        }
+      }
+
+      orderRequest.order.fulfillments = [fulfillment];
     }
 
     console.log('Creating order with request:', JSON.stringify(orderRequest, null, 2));
