@@ -1,4 +1,4 @@
-// api/create-checkout.js - Simplified checkout using Square Payment Links
+// api/create-checkout.js - Simple redirect to Square checkout
 const { Client, Environment } = require('square');
 const { randomUUID } = require('crypto');
 
@@ -31,69 +31,40 @@ module.exports = async (req, res) => {
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Build line items using item variation IDs
-    const lineItems = items.map(item => {
-      // Use variation ID if available, otherwise use item ID
-      const catalogObjectId = item.variationId || item.id;
-      return {
-        quantity: String(item.quantity),
-        catalogObjectId: catalogObjectId
-      };
-    });
+    // Calculate total
+    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const itemNames = items.map(i => i.name).join(', ').substring(0, 255);
 
-    console.log('Creating checkout with items:', JSON.stringify(lineItems, null, 2));
+    console.log('Creating checkout for:', itemNames, 'Total:', totalAmount, 'CAD');
 
-    // Create Payment Link (simpler than full order + checkout)
+    // Create a simple payment link (most reliable method)
     const paymentLinkRequest = {
       idempotencyKey: randomUUID(),
       quickPay: {
-        name: items.map(i => i.name).join(', ').substring(0, 255),
+        name: itemNames || 'A Slice of G Order',
         priceMoney: {
-          amount: BigInt(items.reduce((sum, item) => sum + (item.price * item.quantity), 0)),
+          amount: BigInt(totalAmount),
           currency: 'CAD'
         },
         locationId: locationId
       },
       checkoutOptions: {
-        redirectUrl: `${req.headers.origin || 'https://asliceof-g.vercel.app'}`,
+        redirectUrl: req.headers.origin || 'https://asliceof-g.vercel.app',
         merchantSupportEmail: 'stephanie@asliceofg.com',
         askForShippingAddress: fulfillmentType === 'SHIPMENT',
         acceptedPaymentMethods: {
           applePay: true,
           googlePay: true,
-          cashAppPay: true,
+          cashAppPay: false, // Not available in Canada
           afterpayClearpay: false
         }
       },
-      description: note || `Order from A Slice of G - ${fulfillmentType}`
+      description: `${fulfillmentType || 'PICKUP'}${note ? ' - ' + note : ''}`
     };
 
-    // If we have valid catalog items, use them; otherwise use quickPay
-    let result;
-    try {
-      // Try to create with catalog items first
-      const orderLineItems = items.map(item => ({
-        quantity: String(item.quantity),
-        catalogObjectId: item.id
-      }));
-      
-      result = await client.checkoutApi.createPaymentLink({
-        idempotencyKey: randomUUID(),
-        order: {
-          locationId: locationId,
-          lineItems: orderLineItems
-        },
-        checkoutOptions: {
-          redirectUrl: `${req.headers.origin || 'https://asliceof-g.vercel.app'}`,
-          merchantSupportEmail: 'stephanie@asliceofg.com',
-          askForShippingAddress: fulfillmentType === 'SHIPMENT'
-        }
-      });
-    } catch (orderError) {
-      // Fall back to quickPay if catalog items fail
-      console.log('Catalog order failed, using quickPay:', orderError.message);
-      result = await client.checkoutApi.createPaymentLink(paymentLinkRequest);
-    }
+    console.log('Payment link request:', JSON.stringify(paymentLinkRequest, null, 2));
+
+    const result = await client.checkoutApi.createPaymentLink(paymentLinkRequest);
 
     console.log('Payment link created:', result.paymentLink.url);
 
@@ -102,7 +73,7 @@ module.exports = async (req, res) => {
       checkoutUrl: result.paymentLink.url,
       orderId: result.paymentLink.orderId,
       total: {
-        amount: items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+        amount: totalAmount,
         currency: 'CAD'
       }
     });
@@ -115,7 +86,7 @@ module.exports = async (req, res) => {
     
     if (error.errors && error.errors.length > 0) {
       errorMessage = error.errors[0].detail || errorMessage;
-      details = JSON.stringify(error.errors);
+      details = JSON.stringify(error.errors, null, 2);
     }
 
     res.status(500).json({
