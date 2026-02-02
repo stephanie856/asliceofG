@@ -19,6 +19,7 @@ module.exports = async (req, res) => {
     console.log('Environment:', envSetting);
     console.log('Is Production:', isProduction);
     console.log('Token exists:', !!accessToken);
+    console.log('Location ID:', process.env.SQUARE_LOCATION_ID);
     
     if (!accessToken) {
       return res.status(500).json({
@@ -33,7 +34,10 @@ module.exports = async (req, res) => {
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Fetch catalog items
+    // Fetch catalog items for the specific location
+    const locationId = process.env.SQUARE_LOCATION_ID;
+    console.log('Fetching catalog for location:', locationId);
+    
     const response = await client.catalogApi.listCatalog(undefined, 'ITEM,CATEGORY,IMAGE');
     const result = response.result;
     
@@ -144,10 +148,11 @@ module.exports = async (req, res) => {
       debug: {
         environment: envSetting,
         isProduction: isProduction,
+        locationId: locationId,
         totalObjects: result.objects ? result.objects.length : 0,
         allItemsCount: allItems.length,
         filteredOutCount: allItems.length - products.length,
-        rawItems: allItems.map(p => ({ name: p.name, available: p.available }))
+        rawItems: allItems.map(p => ({ name: p.name, category: p.category, available: p.available }))
       }
     });
 
