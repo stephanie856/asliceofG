@@ -18,12 +18,11 @@ module.exports = async (req, res) => {
     console.log('Environment:', process.env.SQUARE_ENVIRONMENT || 'not set');
     console.log('Token exists:', !!process.env.SQUARE_ACCESS_TOKEN);
 
-    // Initialize Square client
+    // Initialize Square client - defaults to Production
+    const isProduction = !process.env.SQUARE_ENVIRONMENT || process.env.SQUARE_ENVIRONMENT === 'production';
     const client = new Client({
       accessToken: process.env.SQUARE_ACCESS_TOKEN,
-      environment: process.env.SQUARE_ENVIRONMENT === 'sandbox' 
-        ? Environment.Sandbox 
-        : Environment.Production
+      environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
     // Fetch catalog items
