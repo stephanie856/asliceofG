@@ -967,10 +967,8 @@
             <a href="#home" class="logo">A Slice of G</a>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#products">Rum Infused Bites</a></li>
-                <li><a href="#accessories">Accessories</a></li>
-                <li><a href="#dinner-parties">Dinner Parties</a></li>
-                <li><a href="#catering-products">Catering</a></li>
+                <li><a href="rum-infused-bites.html">Rum Infused Bites</a></li>
+                <li><a href="accessories.html">Accessories</a></li>
                 <li><a href="#about">About Us</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li><a href="https://www.instagram.com/_sliceofg/" target="_blank" class="instagram-link">@_sliceofg</a></li>
@@ -1019,91 +1017,15 @@
         </div>
     </section>
 
-    <!-- Products Section -->
-    <section id="products">
+    <!-- Shop Link Section -->
+    <section id="shop-link" style="text-align: center; padding: 4rem 2rem;">
         <div class="section-header scroll-reveal">
-            <h2>Rum Infused Bites</h2>
-            <p>Our signature collection of handcrafted cakes and cookies, infused with premium Caribbean rum</p>
+            <h2>Explore Our Collections</h2>
+            <p>Browse our full range of rum-infused treats and accessories</p>
         </div>
-        <div class="products-grid" id="productsGrid">
-            <!-- Products will be loaded from Square here -->
-            <div class="product-card scroll-reveal loading">
-                <div class="product-image">Product Image</div>
-                <div class="product-info">
-                    <h3>Rum Cake Deluxe</h3>
-                    <p>Our signature rum cake, moist and rich with Caribbean rum and topped with our secret glaze.</p>
-                    <div class="product-price">$45.00</div>
-                    <button class="btn btn-primary" onclick="openPayment('Rum Cake Deluxe', 4500)">Add to Cart</button>
-                </div>
-            </div>
-            <div class="product-card scroll-reveal loading">
-                <div class="product-image">Product Image</div>
-                <div class="product-info">
-                    <h3>Rum Cookies Dozen</h3>
-                    <p>A dozen of our artisan rum-infused cookies, perfect for gifting or treating yourself.</p>
-                    <div class="product-price">$28.00</div>
-                    <button class="btn btn-primary" onclick="openPayment('Rum Cookies', 2800)">Add to Cart</button>
-                </div>
-            </div>
-            <div class="product-card scroll-reveal loading">
-                <div class="product-image">Product Image</div>
-                <div class="product-info">
-                    <h3>Mini Rum Cakes</h3>
-                    <p>Individual-sized rum cakes, perfect for events, parties, or personal indulgence.</p>
-                    <div class="product-price">$35.00</div>
-                    <button class="btn btn-primary" onclick="openPayment('Mini Rum Cakes', 3500)">Add to Cart</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Accessories Section -->
-    <section id="accessories">
-        <div class="section-header scroll-reveal">
-            <h2>Accessories</h2>
-            <p>Beautiful cards and tags to make your gifts extra special</p>
-        </div>
-        <div class="products-grid" id="accessoriesGrid">
-            <div class="product-card scroll-reveal loading">
-                <div class="product-image">Accessory Image</div>
-                <div class="product-info">
-                    <h3>Gift Cards Set</h3>
-                    <p>Elegant handcrafted cards perfect for any occasion.</p>
-                    <div class="product-price">$8.00</div>
-                    <button class="btn btn-primary" onclick="openPayment('Gift Cards', 800)">Add to Cart</button>
-                </div>
-            </div>
-            <div class="product-card scroll-reveal loading">
-                <div class="product-image">Accessory Image</div>
-                <div class="product-info">
-                    <h3>Custom Gift Tags</h3>
-                    <p>Personalized tags to add that special touch to your order.</p>
-                    <div class="product-price">$5.00</div>
-                    <button class="btn btn-primary" onclick="openPayment('Gift Tags', 500)">Add to Cart</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Dinner Parties Section -->
-    <section id="dinner-parties">
-        <div class="section-header scroll-reveal">
-            <h2>Dinner Parties</h2>
-            <p>Elevate your dinner parties with our exquisite rum-infused desserts and custom creations</p>
-        </div>
-        <div class="products-grid" id="dinnerPartiesGrid">
-            <!-- Dinner Party products will be loaded from Square here -->
-        </div>
-    </section>
-
-    <!-- Catering Section -->
-    <section id="catering-products">
-        <div class="section-header scroll-reveal">
-            <h2>Catering</h2>
-            <p>Custom catering options for events, celebrations, and corporate gatherings</p>
-        </div>
-        <div class="products-grid" id="cateringGrid">
-            <!-- Catering products will be loaded from Square here -->
+        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+            <a href="rum-infused-bites.html" class="btn btn-primary" style="min-width: 200px;">Rum Infused Bites</a>
+            <a href="accessories.html" class="btn btn-primary" style="min-width: 200px;">Gift Wrap Accessories</a>
         </div>
     </section>
 
@@ -1520,9 +1442,9 @@
                 
                 // Featured items (only these 3 show on homepage featured section)
                 const featuredNames = [
-                    'valentines day treat box',
-                    'the hidden treasure', 
-                    'the gift of g'
+                    'valentine',
+                    'hidden treasure', 
+                    'gift of g'
                 ];
                 
                 const featuredProducts = data.products.filter(product => {
@@ -1536,9 +1458,7 @@
                 // Group ALL products by category for category pages
                 const categorizedProducts = {
                     'Rum Infused Bites': [],
-                    'Accessories': [],
-                    'Dinner Parties': [],
-                    'Catering': []
+                    'Gift Wrap Accessories': []
                 };
                 
                 data.products.forEach(product => {
@@ -1548,11 +1468,8 @@
                     }
                 });
                 
-                // Render ALL products by category
-                renderProductsByCategory('products', categorizedProducts['Rum Infused Bites']);
-                renderProductsByCategory('accessories', categorizedProducts['Accessories']);
-                renderProductsByCategory('dinner-parties', categorizedProducts['Dinner Parties']);
-                renderProductsByCategory('catering-products', categorizedProducts['Catering']);
+                // Only render featured on homepage - category pages handle their own
+                // Featured items are already rendered above
                 
             } catch (error) {
                 console.error('Error loading Square products:', error);

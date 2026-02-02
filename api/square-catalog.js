@@ -76,7 +76,7 @@ module.exports = async (req, res) => {
         const variationData = variation ? variation.itemVariationData : {};
         
         // Category mapping - only include items from specific categories
-        const allowedCategories = ['Rum Infused Bites', 'Accessories', 'Dinner Parties', 'Catering'];
+        const allowedCategories = ['Rum Infused Bites', 'Gift Wrap Accessories', 'Dinner Parties', 'Catering'];
         
         let originalCategory = '';
         if (itemData.categoryId && categories[itemData.categoryId]) {
@@ -86,14 +86,14 @@ module.exports = async (req, res) => {
         const catLower = originalCategory.toLowerCase();
         let categoryName = null;
         
-        // Map Square categories to site categories
-        if (catLower.includes('accessor') || catLower.includes('card') || catLower.includes('tag') || catLower.includes('gift')) {
-          categoryName = 'Accessories';
-        } else if (catLower.includes('cake') || catLower.includes('cookie') || catLower.includes('rum') || catLower.includes('bite')) {
+        // Map Square categories to site categories - STRICT matching
+        if (catLower === 'gift wrap accessories' || catLower.includes('gift wrap')) {
+          categoryName = 'Gift Wrap Accessories';
+        } else if (catLower === 'rum infused bites' || catLower.includes('rum infused')) {
           categoryName = 'Rum Infused Bites';
-        } else if (catLower.includes('dinner') || catLower.includes('party')) {
+        } else if (catLower === 'dinner parties' || catLower.includes('dinner party')) {
           categoryName = 'Dinner Parties';
-        } else if (catLower.includes('cater')) {
+        } else if (catLower === 'catering' || catLower.includes('catering')) {
           categoryName = 'Catering';
         }
         
