@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Slice of G | Artisan Rum-Infused Baked Goods</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Square Web Payments SDK -->
+    <script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
+    
+    <style>
+        :root {
+            --cream: #FFF8F0;
+            --warm-white: #FFFBF5;
+            --dark-brown: #2C1810;
+            --medium-brown: #5C4033;
+            --accent-gold: #D4AF37;
+            --soft-pink: #F4E4E1;
+            --text-dark: #1A1410;
+            --text-light: rgba(255, 255, 255, 0.95);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--warm-white);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 248, 240, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1.5rem 5%;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        nav.scrolled {
+            padding: 1rem 5%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            text-decoration: none;
+            letter-spacing: 2px;
+            transition: color 0.3s ease;
+        }
+        
+        .logo:hover {
+            color: var(--accent-gold);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark-brown);
+            font-weight: 400;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gold);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .instagram-link {
+            color: var(--accent-gold) !important;
+            font-weight: 500;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .mobile-menu-btn span {
+            width: 25px;
+            height: 2px;
+            background: var(--dark-brown);
+            transition: all 0.3s ease;
+        }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 8rem 5% 4rem;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--soft-pink) 100%);
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(244, 228, 225, 0.3) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        
+        .hero-content {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-text {
+            animation: fadeInUp 1s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-text h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 5rem;
+            font-weight: 600;
+            line-height: 1.1;
+            color: var(--dark-brown);
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .hero-text .subtitle {
+            font-size: 1.3rem;
+            color: var(--medium-brown);
+            margin-bottom: 2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        
+        .hero-text p {
+            font-size: 1.1rem;
+            color: var(--medium-brown);
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 50px;
+            transition: all 0.4s ease;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: var(--dark-brown);
+            color: var(--text-light);
+            box-shadow: 0 4px 15px rgba(44, 24, 16, 0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(44, 24, 16, 0.3);
+            background: var(--medium-brown);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--dark-brown);
+            border: 2px solid var(--dark-brown);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--dark-brown);
+            color: var(--text-light);
+            transform: translateY(-2px);
+        }
+        
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 1s ease 0.3s both;
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .hero-image-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            aspect-ratio: 4/5;
+            background: linear-gradient(135deg, var(--soft-pink), var(--accent-gold));
+        }
+        
+        .hero-image-container::before {
+            content: 'Your Beautiful Cake Photo Here';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: rgba(44, 24, 16, 0.3);
+            text-align: center;
+            z-index: 1;
+        }
+        
+        /* Sections */
+        section {
+            padding: 6rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .section-header h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--medium-brown);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .product-image {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--soft-pink), var(--cream));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            color: rgba(44, 24, 16, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .product-card:hover .product-image::after {
+            opacity: 1;
+        }
+        
+        .product-info {
+            padding: 2rem;
+        }
+        
+        .product-info h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-info p {
+            color: var(--medium-brown);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+        
+        /* About Section */
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        .about-text h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 1.5rem;
+        }
+        
+        .about-text p {
+            color: var(--medium-brown);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+        
+        .about-image {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, var(--cream), var(--soft-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            color: rgba(44, 24, 16, 0.3);
+        }
+        
+        /* Catering Section */
+        .catering-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card p {
+            color: var(--medium-brown);
+            font-size: 1rem;
+        }
+        
+        /* Contact Section */
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            background: white;
+            padding: 4rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        }
+        
+        .contact-info h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--dark-brown);
+            margin-bottom: 2rem;
+        }
+        
+        .contact-detail {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            color: var(--medium-brown);
+        }
+        
+        .contact-detail strong {
+            color: var(--dark-brown);
+            min-width: 120px;
+        }
+        
+        .contact-detail a {
+            color: var(--accent-gold);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .contact-detail a:hover {
+            color: var(--dark-brown);
+        }
+        
+        .contact-form input,
+        .contact-form textarea {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid rgba(44, 24, 16, 0.1);
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .contact-form input:focus,
+        .contact-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+        
+        .contact-form textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark-brown);
+            color: var(--text-light);
+            padding: 3rem 5%;
+            text-align: center;
+        }
+        
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent-gold);
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .social-links a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--accent-gold);
+            transform: scale(1.2);
+        }
+        
+        .footer-text {
+            margin-top: 2rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        /* Square Payment Container */
+        #payment-container {
+            max-width: 500px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        #payment-container.active {
+            display: block;
+        }
+        
+        #card-container {
+            margin: 1.5rem 0;
+        }
+        
+        #payment-status {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        #payment-status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        
+        #payment-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero-content,
+            .about-content,
+            .contact-container {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+            
+            .hero-text h1 {
+                font-size: 4rem;
+            }
+            
+            .section-header h2 {
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 70%;
+                max-width: 300px;
+                background: var(--cream);
+                flex-direction: column;
+                padding: 5rem 2rem;
+                gap: 2rem;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: flex;
+                z-index: 1001;
+            }
+            
+            .mobile-menu-btn.active span:nth-child(1) {
+                transform: rotate(45deg) translate(8px, 8px);
+            }
+            
+            .mobile-menu-btn.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .mobile-menu-btn.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -7px);
+            }
+            
+            .hero-text h1 {
+                font-size: 3rem;
+            }
+            
+            .hero-text .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            section {
+                padding: 4rem 5%;
+            }
+            
+            .section-header h2 {
+                font-size: 2.5rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-container {
+                padding: 2rem;
+            }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        /* Scroll Animations */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#home" class="logo">A Slice of G</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#products">Rum Infused Bites</a></li>
+                <li><a href="#accessories">Accessories</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#catering">Catering</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="https://www.instagram.com/_sliceofg/" target="_blank" class="instagram-link">@_sliceofg</a></li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Not All<br>Rum Cake<br>Wears Black</h1>
+                <p class="subtitle">A Slice of G - Where Tradition Meets Innovation</p>
+                <p>Experience our signature rum-infused cakes and cookies that break the mold. Handcrafted with premium Caribbean rum and the finest ingredients, each creation is a delicious rebellion against the ordinary.</p>
+                <div class="cta-buttons">
+                    <a href="#products" class="btn btn-primary">Shop Our Collection</a>
+                    <a href="#about" class="btn btn-secondary">Our Story</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-container">
+                    <!-- Replace with actual image: <img src="your-hero-image.jpg" alt="A Slice of G Cake"> -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products">
+        <div class="section-header scroll-reveal">
+            <h2>Rum Infused Bites</h2>
+            <p>Our signature collection of handcrafted cakes and cookies, infused with premium Caribbean rum</p>
+        </div>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be loaded from Square here -->
+            <div class="product-card scroll-reveal loading">
+                <div class="product-image">Product Image</div>
+                <div class="product-info">
+                    <h3>Rum Cake Deluxe</h3>
+                    <p>Our signature rum cake, moist and rich with Caribbean rum and topped with our secret glaze.</p>
+                    <div class="product-price">$45.00</div>
+                    <button class="btn btn-primary" onclick="openPayment('Rum Cake Deluxe', 4500)">Add to Cart</button>
+                </div>
+            </div>
+            <div class="product-card scroll-reveal loading">
+                <div class="product-image">Product Image</div>
+                <div class="product-info">
+                    <h3>Rum Cookies Dozen</h3>
+                    <p>A dozen of our artisan rum-infused cookies, perfect for gifting or treating yourself.</p>
+                    <div class="product-price">$28.00</div>
+                    <button class="btn btn-primary" onclick="openPayment('Rum Cookies', 2800)">Add to Cart</button>
+                </div>
+            </div>
+            <div class="product-card scroll-reveal loading">
+                <div class="product-image">Product Image</div>
+                <div class="product-info">
+                    <h3>Mini Rum Cakes</h3>
+                    <p>Individual-sized rum cakes, perfect for events, parties, or personal indulgence.</p>
+                    <div class="product-price">$35.00</div>
+                    <button class="btn btn-primary" onclick="openPayment('Mini Rum Cakes', 3500)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accessories Section -->
+    <section id="accessories">
+        <div class="section-header scroll-reveal">
+            <h2>Accessories</h2>
+            <p>Beautiful cards and tags to make your gifts extra special</p>
+        </div>
+        <div class="products-grid" id="accessoriesGrid">
+            <div class="product-card scroll-reveal loading">
+                <div class="product-image">Accessory Image</div>
+                <div class="product-info">
+                    <h3>Gift Cards Set</h3>
+                    <p>Elegant handcrafted cards perfect for any occasion.</p>
+                    <div class="product-price">$8.00</div>
+                    <button class="btn btn-primary" onclick="openPayment('Gift Cards', 800)">Add to Cart</button>
+                </div>
+            </div>
+            <div class="product-card scroll-reveal loading">
+                <div class="product-image">Accessory Image</div>
+                <div class="product-info">
+                    <h3>Custom Gift Tags</h3>
+                    <p>Personalized tags to add that special touch to your order.</p>
+                    <div class="product-price">$5.00</div>
+                    <button class="btn btn-primary" onclick="openPayment('Gift Tags', 500)">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-header scroll-reveal">
+            <h2>About A Slice of G</h2>
+        </div>
+        <div class="about-content">
+            <div class="about-text scroll-reveal">
+                <h3>Our Story</h3>
+                <p>A Slice of G was born from a passion for combining traditional Caribbean flavors with artisan baking techniques. Every cake and cookie we create is a labor of love, crafted with premium ingredients and infused with carefully selected rums.</p>
+                <p>We believe that every celebration deserves something special, something that creates lasting memories. That's why we pour our heart into every batch, ensuring that each bite delivers not just incredible taste, but an experience.</p>
+                <p>From our kitchen to your table, we're committed to quality, authenticity, and the joy that comes from sharing exceptional baked goods with the people you love.</p>
+            </div>
+            <div class="about-image scroll-reveal">
+                About Image
+            </div>
+        </div>
+    </section>
+
+    <!-- Catering Section -->
+    <section id="catering">
+        <div class="section-header scroll-reveal">
+            <h2>Dinner Parties & Catering</h2>
+            <p>Let us make your next event unforgettable with our custom catering services</p>
+        </div>
+        <div class="catering-features">
+            <div class="feature-card scroll-reveal loading">
+                <div class="feature-icon">🎂</div>
+                <h3>Custom Cakes</h3>
+                <p>Bespoke rum cakes designed and crafted specifically for your event, any size or style.</p>
+            </div>
+            <div class="feature-card scroll-reveal loading">
+                <div class="feature-icon">🎉</div>
+                <h3>Party Packages</h3>
+                <p>Complete dessert packages perfect for birthdays, weddings, corporate events, and celebrations.</p>
+            </div>
+            <div class="feature-card scroll-reveal loading">
+                <div class="feature-icon">🍽️</div>
+                <h3>Dinner Parties</h3>
+                <p>Intimate dinner party catering featuring our signature desserts paired with your menu.</p>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="#contact" class="btn btn-primary">Request a Quote</a>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="section-header scroll-reveal">
+            <h2>Contact G</h2>
+            <p>Get in touch for orders, inquiries, or custom requests</p>
+        </div>
+        <div class="contact-container scroll-reveal">
+            <div class="contact-info">
+                <h3>Let's Connect</h3>
+                <div class="contact-detail">
+                    <strong>Email:</strong>
+                    <a href="mailto:stephanie@asliceofg.com">stephanie@asliceofg.com</a>
+                </div>
+                <div class="contact-detail">
+                    <strong>Instagram:</strong>
+                    <a href="https://www.instagram.com/_sliceofg/" target="_blank">@_sliceofg</a>
+                </div>
+                <div class="contact-detail">
+                    <strong>Location:</strong>
+                    <span>Toronto, Ontario</span>
+                </div>
+                <p style="margin-top: 2rem; color: var(--medium-brown);">
+                    Follow us on Instagram for daily inspiration, behind-the-scenes content, and special promotions!
+                </p>
+            </div>
+            <div class="contact-form">
+                <input type="text" placeholder="Your Name" required>
+                <input type="email" placeholder="Your Email" required>
+                <input type="tel" placeholder="Phone Number">
+                <textarea placeholder="Your Message or Order Details" required></textarea>
+                <button class="btn btn-primary" style="width: 100%;">Send Message</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Square Payment Container -->
+    <div id="payment-container">
+        <h3 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 1rem;">Complete Your Order</h3>
+        <div id="card-container"></div>
+        <button id="card-button" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Pay Now</button>
+        <div id="payment-status"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">A Slice of G</div>
+            <p>Artisan Rum-Infused Baked Goods</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/_sliceofg/" target="_blank">📷 Instagram</a>
+                <a href="mailto:stephanie@asliceofg.com">✉️ Email</a>
+            </div>
+            <div class="footer-text">
+                <p>&copy; 2026 A Slice of G. All rights reserved.</p>
+                <p>Made with ❤️ in Toronto, Ontario</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenuBtn.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking a link
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuBtn.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Scroll reveal animation
+        const revealElements = document.querySelectorAll('.scroll-reveal');
+        
+        const revealOnScroll = () => {
+            revealElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('active');
+                }
+            });
+        };
+        
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll(); // Initial check
+        
+        // Square Payment Integration
+        let currentItem = '';
+        let currentPrice = 0;
+        let payments = null;
+        let card = null;
+        
+        async function initializeSquarePayments() {
+            // Replace with your actual Square Application ID and Location ID
+            const appId = 'YOUR_SQUARE_APPLICATION_ID';
+            const locationId = 'YOUR_SQUARE_LOCATION_ID';
+            
+            try {
+                payments = Square.payments(appId, locationId);
+                card = await payments.card();
+                await card.attach('#card-container');
+                
+                document.getElementById('card-button').addEventListener('click', async () => {
+                    const statusDiv = document.getElementById('payment-status');
+                    statusDiv.style.display = 'none';
+                    
+                    const result = await card.tokenize();
+                    
+                    if (result.status === 'OK') {
+                        // Send the token to your server to process the payment
+                        await processPayment(result.token, currentPrice, currentItem);
+                    } else {
+                        showPaymentStatus('error', 'Card tokenization failed. Please try again.');
+                    }
+                });
+            } catch (e) {
+                console.error('Failed to initialize Square Payments:', e);
+                showPaymentStatus('error', 'Payment system unavailable. Please contact us directly.');
+            }
+        }
+        
+        function openPayment(itemName, priceInCents) {
+            currentItem = itemName;
+            currentPrice = priceInCents;
+            
+            const paymentContainer = document.getElementById('payment-container');
+            paymentContainer.classList.add('active');
+            paymentContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        async function processPayment(token, amount, itemName) {
+            try {
+                // Send payment to your backend
+                const response = await fetch('/api/process-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        sourceId: token, 
+                        amount: amount,
+                        itemName: itemName,
+                        currency: 'USD'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showPaymentStatus('success', `Payment successful! Thank you for ordering ${itemName}. You'll receive a confirmation email shortly.`);
+                    
+                    // Clear the form after successful payment
+                    setTimeout(() => {
+                        document.getElementById('payment-container').classList.remove('active');
+                    }, 3000);
+                } else {
+                    showPaymentStatus('error', result.error || 'Payment failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Payment processing error:', error);
+                showPaymentStatus('error', 'Payment processing failed. Please contact us at stephanie@asliceofg.com');
+            }
+        }
+        
+        function showPaymentStatus(type, message) {
+            const statusDiv = document.getElementById('payment-status');
+            statusDiv.className = type;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+        }
+        
+        // Load Square Catalog Products
+        async function loadSquareProducts() {
+            try {
+                const response = await fetch('/api/square-catalog');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    console.error('Failed to load products:', data.error);
+                    return;
+                }
+                
+                // Group products by category
+                const categorizedProducts = {
+                    'Rum Infused Bites': [],
+                    'Accessories': []
+                };
+                
+                data.products.forEach(product => {
+                    // Check if product belongs to a category
+                    const category = product.category || 'Rum Infused Bites';
+                    
+                    if (categorizedProducts[category]) {
+                        categorizedProducts[category].push(product);
+                    } else {
+                        // Default to Rum Infused Bites if category doesn't exist
+                        categorizedProducts['Rum Infused Bites'].push(product);
+                    }
+                });
+                
+                // Render products by category
+                renderProductsByCategory('products', categorizedProducts['Rum Infused Bites']);
+                renderProductsByCategory('accessories', categorizedProducts['Accessories']);
+                
+            } catch (error) {
+                console.error('Error loading Square products:', error);
+                // Fallback to placeholder products if API fails
+            }
+        }
+        
+        function renderProductsByCategory(sectionId, products) {
+            const gridId = sectionId === 'products' ? 'productsGrid' : 'accessoriesGrid';
+            const grid = document.getElementById(gridId);
+            
+            if (!products || products.length === 0) {
+                return; // Keep placeholder products if no items from Square
+            }
+            
+            grid.innerHTML = products.map(product => `
+                <div class="product-card scroll-reveal loading">
+                    <div class="product-image">
+                        ${product.imageUrl 
+                            ? `<img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                            : 'Product Image'}
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <p>${product.description || 'Delicious handcrafted treats made with love'}</p>
+                        <div class="product-price">$${(product.price / 100).toFixed(2)}</div>
+                        <button class="btn btn-primary" onclick="openPayment('${product.name}', ${product.price})">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Re-initialize scroll reveal for new products
+            revealOnScroll();
+        }
+        
+        // Initialize Square on page load
+        // Uncomment these when you have your Square credentials configured
+        // window.addEventListener('load', () => {
+        //     initializeSquarePayments();
+        //     loadSquareProducts();
+        // });
+    </script>
+</body>
+</html>
