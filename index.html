@@ -969,6 +969,7 @@
                 <li><a href="#home">Home</a></li>
                 <li><a href="rum-infused-bites.html">Rum Infused Bites</a></li>
                 <li><a href="accessories.html">Accessories</a></li>
+                <li><a href="https://www.asliceofg.com/account/login" target="_blank">My Account</a></li>
                 <li><a href="#about">About Us</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li><a href="https://www.instagram.com/_sliceofg/" target="_blank" class="instagram-link">@_sliceofg</a></li>
@@ -1499,6 +1500,7 @@
             }
             
             // Replace placeholder products with Square products
+            // Link to Square Online Store for full checkout with fulfillment options
             grid.innerHTML = products.map(product => `
                 <div class="product-card scroll-reveal loading">
                     <div class="product-image">
@@ -1510,9 +1512,12 @@
                         <h3>${product.name}</h3>
                         <p>${product.description || 'Delicious handcrafted treats made with love'}</p>
                         <div class="product-price">$${(product.price / 100).toFixed(2)}</div>
-                        <button class="btn btn-primary" onclick='addToCart(${JSON.stringify(product).replace(/'/g, "&#39;")})'>
-                            Add to Cart
-                        </button>
+                        <a href="${product.squareUrl}" target="_blank" class="btn btn-primary" style="display: inline-block; text-align: center; width: 100%;">
+                            Buy on Square
+                        </a>
+                        <p style="font-size: 0.8rem; color: #999; margin-top: 0.5rem; text-align: center;">
+                            Choose shipping or pickup at checkout
+                        </p>
                     </div>
                 </div>
             `).join('');
