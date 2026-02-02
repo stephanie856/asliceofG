@@ -1,4 +1,4 @@
-// api/create-checkout.js - Quick Pay Checkout (most reliable method)
+// api/create-checkout.js - Square Order Checkout (uses catalog items)
 const { Client, Environment } = require('square');
 const { randomUUID } = require('crypto');
 
@@ -31,65 +31,87 @@ module.exports = async (req, res) => {
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Calculate total amount in cents
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    // Build item names list
-    const itemNames = items.map(i => `${i.quantity}x ${i.name}`).join(', ');
-    const description = itemNames.length > 255 ? itemNames.substring(0, 252) + '...' : itemNames;
+    console.log('Creating Order checkout for items:', items.map(i => ({ 
+      name: i.name, 
+      qty: i.quantity, 
+      id: i.id,
+      variationId: i.variationId 
+    })));
 
-    console.log('Creating Quick Pay checkout:');
-    console.log('Items:', items.map(i => ({ name: i.name, qty: i.quantity, price: i.price })));
-    console.log('Total:', totalAmount, 'CAD');
-    console.log('Fulfillment:', fulfillmentType);
+    // Build line items from catalog
+    const lineItems = items.map(item => {
+      // Use variationId if available (preferred), otherwise use item id
+      const catalogObjectId = item.variationId || item.id;
+      
+      return {
+        quantity: String(item.quantity),
+        catalogObjectId: catalogObjectId
+      };
+    });
 
-    // Build checkout options
-    const checkoutOptions = {
-      redirectUrl: req.headers.origin || 'https://asliceof-g.vercel.app',
-      merchantSupportEmail: 'stephanie@asliceofg.com',
-      askForShippingAddress: fulfillmentType === 'SHIPMENT',
-      acceptedPaymentMethods: {
-        applePay: true,
-        googlePay: true,
-        cashAppPay: false, // Not available in Canada
-        afterpayClearpay: false
+    console.log('Line items:', JSON.stringify(lineItems, null, 2));
+
+    // Step 1: Create the Order
+    const orderRequest = {
+      idempotencyKey: randomUUID(),
+      order: {
+        locationId: locationId,
+        lineItems: lineItems,
+        source: {
+          name: 'A Slice of G Website'
+        }
       }
     };
 
-    // Add fulfillment note if provided
-    const fullDescription = note 
-      ? `${description} | Note: ${note}` 
-      : description;
+    // Add fulfillment preferences if specified
+    if (fulfillmentType) {
+      orderRequest.order.fulfillments = [{
+        type: fulfillmentType,
+        state: 'PROPOSED'
+      }];
+    }
 
-    // Create Quick Pay Payment Link
+    console.log('Order request:', JSON.stringify(orderRequest, null, 2));
+
+    const { result: orderResult } = await client.ordersApi.createOrder(orderRequest);
+    const orderId = orderResult.order.id;
+    const totalMoney = orderResult.order.totalMoney;
+
+    console.log('Order created:', orderId);
+    console.log('Order total:', totalMoney);
+
+    // Step 2: Create Payment Link with the order
     const paymentLinkRequest = {
       idempotencyKey: randomUUID(),
-      quickPay: {
-        name: fullDescription.substring(0, 255) || 'A Slice of G Order',
-        priceMoney: {
-          amount: BigInt(totalAmount),
-          currency: 'CAD'
-        },
+      order: {
+        orderId: orderId,
         locationId: locationId
       },
-      checkoutOptions: checkoutOptions,
-      description: fulfillmentType || 'PICKUP'
+      checkoutOptions: {
+        redirectUrl: req.headers.origin || 'https://asliceof-g.vercel.app',
+        merchantSupportEmail: 'stephanie@asliceofg.com',
+        askForShippingAddress: fulfillmentType === 'SHIPMENT'
+      }
     };
+
+    // Add pre-filled email if provided
+    if (email) {
+      paymentLinkRequest.checkoutOptions.prePopulateBuyerEmail = email;
+    }
 
     console.log('Payment link request:', JSON.stringify(paymentLinkRequest, null, 2));
 
     const result = await client.checkoutApi.createPaymentLink(paymentLinkRequest);
 
     console.log('Payment link created:', result.paymentLink.url);
-    console.log('Order ID:', result.paymentLink.orderId);
 
     res.status(200).json({
       success: true,
       checkoutUrl: result.paymentLink.url,
-      orderId: result.paymentLink.orderId,
+      orderId: orderId,
       total: {
-        amount: totalAmount,
-        currency: 'CAD'
+        amount: Number(totalMoney.amount),
+        currency: totalMoney.currency
       }
     });
 
