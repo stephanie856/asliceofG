@@ -1574,14 +1574,13 @@
             // Skip if no grid element exists for this category
             if (!grid) return;
             
-            // Hide section if no products, show if products exist
-            const section = grid.closest('section');
+            // If no products from Square, keep placeholder products
             if (!products || products.length === 0) {
-                if (section) section.style.display = 'none';
+                console.log('No Square products for', sectionId, '- keeping placeholders');
                 return;
             }
-            if (section) section.style.display = '';
             
+            // Replace placeholder products with Square products
             grid.innerHTML = products.map(product => `
                 <div class="product-card scroll-reveal loading">
                     <div class="product-image">
