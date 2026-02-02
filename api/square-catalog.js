@@ -113,16 +113,22 @@ module.exports = async (req, res) => {
           price = Number(variationData.priceMoney.amount);
         }
         
+        // Build Square Online Store URL for this item
+        // This allows customers to see all variations, modifiers, and pickup options
+        const itemSlug = (itemData.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const squareOnlineUrl = `https://www.asliceofg.com/shop/${categoryName.toLowerCase().replace(/\s+/g, '-')}/${itemSlug}`;
+        
         const product = {
           id: item.id,
-          variationId: variation ? variation.id : item.id, // Use variation ID for checkout
+          variationId: variation ? variation.id : item.id,
           name: itemData.name || 'Unnamed Product',
           description: itemData.description || '',
           price: price,
           currency: variationData.priceMoney ? variationData.priceMoney.currency : 'CAD',
           category: categoryName,
           imageUrl: imageUrl,
-          available: !isDeleted && availableOnline
+          available: !isDeleted && availableOnline,
+          squareUrl: squareOnlineUrl // Link to Square Online Store with full options
         };
         
         allItems.push(product);
