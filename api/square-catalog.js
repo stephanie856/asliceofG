@@ -100,7 +100,7 @@ module.exports = async (req, res) => {
         
         // Only include featured items on homepage
         const featuredItems = [
-          'valentines gift boxes',
+          'valentines day treat box',
           'the hidden treasure',
           'the gift of g'
         ];
