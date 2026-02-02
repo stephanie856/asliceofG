@@ -71,17 +71,31 @@ module.exports = async (req, res) => {
         const variation = itemData.variations && itemData.variations[0];
         const variationData = variation ? variation.itemVariationData : {};
         
-        // Category
-        let categoryName = 'Rum Infused Bites';
+        // Category mapping - only include items from specific categories
+        const allowedCategories = ['Rum Infused Bites', 'Accessories', 'Dinner Parties', 'Catering'];
+        
+        let originalCategory = '';
         if (itemData.categoryId && categories[itemData.categoryId]) {
-          categoryName = categories[itemData.categoryId];
+          originalCategory = categories[itemData.categoryId];
         }
         
-        const catLower = categoryName.toLowerCase();
-        if (catLower.includes('accessor') || catLower.includes('card') || catLower.includes('tag')) {
+        const catLower = originalCategory.toLowerCase();
+        let categoryName = null;
+        
+        // Map Square categories to site categories
+        if (catLower.includes('accessor') || catLower.includes('card') || catLower.includes('tag') || catLower.includes('gift')) {
           categoryName = 'Accessories';
         } else if (catLower.includes('cake') || catLower.includes('cookie') || catLower.includes('rum') || catLower.includes('bite')) {
           categoryName = 'Rum Infused Bites';
+        } else if (catLower.includes('dinner') || catLower.includes('party')) {
+          categoryName = 'Dinner Parties';
+        } else if (catLower.includes('cater')) {
+          categoryName = 'Catering';
+        }
+        
+        // Skip items that don't match any allowed category
+        if (!categoryName || !allowedCategories.includes(categoryName)) {
+          return; // Skip this item
         }
         
         // Image

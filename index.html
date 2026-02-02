@@ -1090,24 +1090,23 @@
                 // Group products by category
                 const categorizedProducts = {
                     'Rum Infused Bites': [],
-                    'Accessories': []
+                    'Accessories': [],
+                    'Dinner Parties': [],
+                    'Catering': []
                 };
                 
                 data.products.forEach(product => {
-                    // Check if product belongs to a category
-                    const category = product.category || 'Rum Infused Bites';
-                    
-                    if (categorizedProducts[category]) {
+                    const category = product.category;
+                    if (category && categorizedProducts[category]) {
                         categorizedProducts[category].push(product);
-                    } else {
-                        // Default to Rum Infused Bites if category doesn't exist
-                        categorizedProducts['Rum Infused Bites'].push(product);
                     }
                 });
                 
                 // Render products by category
                 renderProductsByCategory('products', categorizedProducts['Rum Infused Bites']);
                 renderProductsByCategory('accessories', categorizedProducts['Accessories']);
+                renderProductsByCategory('dinner-parties', categorizedProducts['Dinner Parties']);
+                renderProductsByCategory('catering', categorizedProducts['Catering']);
                 
             } catch (error) {
                 console.error('Error loading Square products:', error);
@@ -1116,8 +1115,17 @@
         }
         
         function renderProductsByCategory(sectionId, products) {
-            const gridId = sectionId === 'products' ? 'productsGrid' : 'accessoriesGrid';
+            const gridMap = {
+                'products': 'productsGrid',
+                'accessories': 'accessoriesGrid',
+                'dinner-parties': 'dinnerPartiesGrid',
+                'catering': 'cateringGrid'
+            };
+            const gridId = gridMap[sectionId];
             const grid = document.getElementById(gridId);
+            
+            // Skip if no grid element exists for this category
+            if (!grid) return;
             
             if (!products || products.length === 0) {
                 return; // Keep placeholder products if no items from Square
