@@ -115,6 +115,7 @@ module.exports = async (req, res) => {
         
         const product = {
           id: item.id,
+          variationId: variation ? variation.id : item.id, // Use variation ID for checkout
           name: itemData.name || 'Unnamed Product',
           description: itemData.description || '',
           price: price,

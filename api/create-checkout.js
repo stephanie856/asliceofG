@@ -1,4 +1,4 @@
-// api/create-checkout.js - Simple redirect to Square checkout
+// api/create-checkout.js - Create Order then Payment Link (proper Square flow)
 const { Client, Environment } = require('square');
 const { randomUUID } = require('crypto');
 
@@ -31,49 +31,92 @@ module.exports = async (req, res) => {
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Calculate total
-    const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const itemNames = items.map(i => i.name).join(', ').substring(0, 255);
+    console.log('Creating order for items:', items.map(i => ({ name: i.name, qty: i.quantity })));
 
-    console.log('Creating checkout for:', itemNames, 'Total:', totalAmount, 'CAD');
-
-    // Create a simple payment link (most reliable method)
-    const paymentLinkRequest = {
-      idempotencyKey: randomUUID(),
-      quickPay: {
-        name: itemNames || 'A Slice of G Order',
-        priceMoney: {
-          amount: BigInt(totalAmount),
+    // Step 1: Create an Order with line items
+    const lineItems = items.map(item => {
+      // Build order line item
+      const lineItem = {
+        quantity: String(item.quantity),
+        name: item.name,
+        basePriceMoney: {
+          amount: BigInt(item.price),
           currency: 'CAD'
-        },
+        }
+      };
+      
+      // If we have a Square catalog item ID, use it
+      if (item.id && item.id.startsWith('#') === false) {
+        try {
+          lineItem.catalogObjectId = item.id;
+        } catch (e) {
+          // If catalog ID fails, use custom line item
+        }
+      }
+      
+      return lineItem;
+    });
+
+    // Build order request
+    const orderRequest = {
+      idempotencyKey: randomUUID(),
+      order: {
+        locationId: locationId,
+        lineItems: lineItems,
+        source: {
+          name: 'A Slice of G Website'
+        }
+      }
+    };
+
+    // Add fulfillment if specified
+    if (fulfillmentType) {
+      orderRequest.order.fulfillments = [{
+        type: fulfillmentType,
+        state: 'PROPOSED',
+        pickupDetails: fulfillmentType === 'PICKUP' ? {
+          recipient: email ? { emailAddress: email } : undefined,
+          note: note || undefined
+        } : undefined,
+        shipmentDetails: fulfillmentType === 'SHIPMENT' ? {
+          recipient: email ? { emailAddress: email } : undefined,
+          note: note || undefined
+        } : undefined
+      }];
+    }
+
+    console.log('Order request:', JSON.stringify(orderRequest, null, 2));
+
+    // Create the order
+    const { result: orderResult } = await client.ordersApi.createOrder(orderRequest);
+    const orderId = orderResult.order.id;
+    const totalAmount = orderResult.order.totalMoney.amount;
+
+    console.log('Order created:', orderId, 'Total:', totalAmount);
+
+    // Step 2: Create Payment Link for this order
+    const paymentLinkResult = await client.checkoutApi.createPaymentLink({
+      idempotencyKey: randomUUID(),
+      order: {
+        orderId: orderId,
         locationId: locationId
       },
       checkoutOptions: {
         redirectUrl: req.headers.origin || 'https://asliceof-g.vercel.app',
         merchantSupportEmail: 'stephanie@asliceofg.com',
-        askForShippingAddress: fulfillmentType === 'SHIPMENT',
-        acceptedPaymentMethods: {
-          applePay: true,
-          googlePay: true,
-          cashAppPay: false, // Not available in Canada
-          afterpayClearpay: false
-        }
+        askForShippingAddress: fulfillmentType === 'SHIPMENT'
       },
-      description: `${fulfillmentType || 'PICKUP'}${note ? ' - ' + note : ''}`
-    };
+      description: `A Slice of G - ${items.length} item(s)`
+    });
 
-    console.log('Payment link request:', JSON.stringify(paymentLinkRequest, null, 2));
-
-    const result = await client.checkoutApi.createPaymentLink(paymentLinkRequest);
-
-    console.log('Payment link created:', result.paymentLink.url);
+    console.log('Payment link created:', paymentLinkResult.paymentLink.url);
 
     res.status(200).json({
       success: true,
-      checkoutUrl: result.paymentLink.url,
-      orderId: result.paymentLink.orderId,
+      checkoutUrl: paymentLinkResult.paymentLink.url,
+      orderId: orderId,
       total: {
-        amount: totalAmount,
+        amount: Number(totalAmount),
         currency: 'CAD'
       }
     });
