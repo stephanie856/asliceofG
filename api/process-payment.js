@@ -1,11 +1,8 @@
 // api/process-payment.js
-// This Vercel serverless function processes payments through Square
-
 const { Client, Environment } = require('square');
 const { randomUUID } = require('crypto');
 
 module.exports = async (req, res) => {
-  // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,16 +12,12 @@ module.exports = async (req, res) => {
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      success: false, 
-      error: 'Method not allowed' 
-    });
+    return res.status(405).json({ success: false, error: 'Method not allowed' });
   }
 
   try {
     const { sourceId, amount, itemName, currency = 'USD' } = req.body;
 
-    // Validate required fields
     if (!sourceId || !amount || !itemName) {
       return res.status(400).json({
         success: false,
@@ -32,14 +25,22 @@ module.exports = async (req, res) => {
       });
     }
 
-    // Initialize Square client - defaults to Production
-    const isProduction = !process.env.SQUARE_ENVIRONMENT || process.env.SQUARE_ENVIRONMENT === 'production';
+    const envSetting = (process.env.SQUARE_ENVIRONMENT || 'production').toLowerCase();
+    const isProduction = envSetting !== 'sandbox';
+    const accessToken = process.env.SQUARE_ACCESS_TOKEN;
+
+    if (!accessToken) {
+      return res.status(500).json({
+        success: false,
+        error: 'SQUARE_ACCESS_TOKEN not configured'
+      });
+    }
+
     const client = new Client({
-      accessToken: process.env.SQUARE_ACCESS_TOKEN,
+      accessToken: accessToken,
       environment: isProduction ? Environment.Production : Environment.Sandbox
     });
 
-    // Create payment request
     const paymentRequest = {
       sourceId: sourceId,
       idempotencyKey: randomUUID(),
@@ -52,10 +53,8 @@ module.exports = async (req, res) => {
       autocomplete: true
     };
 
-    // Process the payment
     const { result } = await client.paymentsApi.createPayment(paymentRequest);
 
-    // Return success response
     res.status(200).json({
       success: true,
       payment: {
@@ -70,9 +69,7 @@ module.exports = async (req, res) => {
   } catch (error) {
     console.error('Payment Processing Error:', error);
     
-    // Handle specific Square API errors
     let errorMessage = 'Payment processing failed. Please try again.';
-    
     if (error.errors && error.errors.length > 0) {
       errorMessage = error.errors[0].detail || errorMessage;
     }
