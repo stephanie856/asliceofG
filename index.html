@@ -292,6 +292,212 @@
             right: 0;
         }
         
+        /* Product Detail Modal */
+        .product-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .product-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .product-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            background: var(--warm-white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 3001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .product-modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .product-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .product-modal-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .product-modal-image {
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .product-modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .product-modal h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-modal-price {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+        }
+        
+        .option-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .option-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-brown);
+        }
+        
+        .option-group select,
+        .option-group input[type="datetime-local"],
+        .option-group input[type="number"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        
+        .option-group select:focus,
+        .option-group input:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+        }
+        
+        .modifier-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .modifier-option {
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .modifier-option:hover {
+            border-color: var(--accent-gold);
+        }
+        
+        .modifier-option.selected {
+            background: var(--accent-gold);
+            border-color: var(--accent-gold);
+            color: var(--dark-brown);
+        }
+        
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .quantity-selector button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--accent-gold);
+            background: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .quantity-selector input {
+            width: 60px;
+            text-align: center;
+            font-size: 1.2rem;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        
+        .fulfillment-options {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .fulfillment-option {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .fulfillment-option:hover {
+            border-color: var(--accent-gold);
+        }
+        
+        .fulfillment-option.selected {
+            background: rgba(212,175,55,0.1);
+            border-color: var(--accent-gold);
+        }
+        
+        .fulfillment-option input {
+            display: none;
+        }
+        
+        .product-modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(212,175,55,0.3);
+            background: var(--cream);
+        }
+        
+        .product-modal-footer .btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        
         .cart-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(212,175,55,0.3);
@@ -575,6 +781,21 @@
         </div>
     </div>
 
+    <!-- Product Detail Modal -->
+    <div class="product-modal-overlay" id="productOverlay"></div>
+    <div class="product-modal" id="productModal">
+        <div class="product-modal-header">
+            <h3>Product Details</h3>
+            <button id="productClose" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        <div class="product-modal-content" id="productModalContent">
+            <!-- Content populated by JavaScript -->
+        </div>
+        <div class="product-modal-footer">
+            <button class="btn btn-primary" id="addToCartBtn">Add to Cart - <span id="modalPrice">$0.00</span></button>
+        </div>
+    </div>
+
     <script>
         // Cart State
         let cart = [];
@@ -831,6 +1052,243 @@
         window.addToCart = addToCart;
         window.updateQuantity = updateQuantity;
 
+        // Product Modal Functions
+        let currentModalProduct = null;
+        let currentModalOptions = {};
+
+        const productModal = document.getElementById('productModal');
+        const productOverlay = document.getElementById('productOverlay');
+        const productClose = document.getElementById('productClose');
+        const productModalContent = document.getElementById('productModalContent');
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        const modalPrice = document.getElementById('modalPrice');
+
+        productClose.addEventListener('click', closeProductModal);
+        productOverlay.addEventListener('click', closeProductModal);
+
+        function openProductModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            currentModalProduct = product;
+            currentModalOptions = {
+                variationId: product.variations?.[0]?.id,
+                variationName: product.variations?.[0]?.name,
+                modifiers: [],
+                quantity: 1,
+                fulfillmentType: 'PICKUP',
+                pickupDate: '',
+                pickupTime: ''
+            };
+
+            // Build modal content
+            let content = `
+                <div class="product-modal-image">
+                    ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}">` : 'Product Image'}
+                </div>
+                <h2>${product.name}</h2>
+                <div class="product-modal-price" id="modalPriceDisplay">$${(product.price / 100).toFixed(2)}</div>
+                <p style="color: var(--medium-brown); margin-bottom: 1.5rem;">${product.description || ''}</p>
+            `;
+
+            // Quantity selector
+            content += `
+                <div class="option-group">
+                    <label>Quantity</label>
+                    <div class="quantity-selector">
+                        <button type="button" onclick="updateModalQuantity(-1)">-</button>
+                        <input type="number" id="modalQty" value="1" min="1" max="10" readonly>
+                        <button type="button" onclick="updateModalQuantity(1)">+</button>
+                    </div>
+                </div>
+            `;
+
+            // Variations
+            if (product.variations && product.variations.length > 1) {
+                content += `
+                    <div class="option-group">
+                        <label>Select Option</label>
+                        <select id="modalVariation" onchange="updateModalVariation()">
+                            ${product.variations.map(v => `
+                                <option value="${v.id}" data-name="${v.name}" data-price="${v.price}">${v.name} - $${(v.price / 100).toFixed(2)}</option>
+                            `).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+
+            // Modifiers
+            if (product.modifiers && product.modifiers.length > 0) {
+                product.modifiers.forEach(mod => {
+                    content += `
+                        <div class="option-group">
+                            <label>${mod.name}</label>
+                            <div class="modifier-options">
+                                ${mod.options.map(opt => `
+                                    <div class="modifier-option" onclick="toggleModifier(this, '${opt.id}', '${opt.name}', ${opt.price})" data-id="${opt.id}">
+                                        ${opt.name}${opt.price > 0 ? ' (+$' + (opt.price / 100).toFixed(2) + ')' : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            // Fulfillment type
+            content += `
+                <div class="option-group">
+                    <label>Fulfillment Method</label>
+                    <div class="fulfillment-options">
+                        <label class="fulfillment-option selected" onclick="selectModalFulfillment('PICKUP')">
+                            <input type="radio" name="modalFulfillment" value="PICKUP" checked>
+                            <div>📍</div>
+                            <div><strong>Pickup</strong></div>
+                        </label>
+                        <label class="fulfillment-option" onclick="selectModalFulfillment('SHIPMENT')">
+                            <input type="radio" name="modalFulfillment" value="SHIPMENT">
+                            <div>📦</div>
+                            <div><strong>Shipping</strong></div>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            // Pickup date/time (only show if pickup selected)
+            content += `
+                <div class="option-group" id="pickupDateGroup">
+                    <label>Preferred Pickup Date & Time</label>
+                    <input type="datetime-local" id="modalPickupDate" onchange="updateModalPickup()">
+                </div>
+            `;
+
+            productModalContent.innerHTML = content;
+            updateModalPrice();
+
+            productModal.classList.add('active');
+            productOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProductModal() {
+            productModal.classList.remove('active');
+            productOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            currentModalProduct = null;
+        }
+
+        window.updateModalQuantity = function(change) {
+            const input = document.getElementById('modalQty');
+            let val = parseInt(input.value) + change;
+            if (val < 1) val = 1;
+            if (val > 10) val = 10;
+            input.value = val;
+            currentModalOptions.quantity = val;
+            updateModalPrice();
+        };
+
+        window.updateModalVariation = function() {
+            const select = document.getElementById('modalVariation');
+            const option = select.options[select.selectedIndex];
+            currentModalOptions.variationId = option.value;
+            currentModalOptions.variationName = option.dataset.name;
+            updateModalPrice();
+        };
+
+        window.toggleModifier = function(el, id, name, price) {
+            el.classList.toggle('selected');
+            const isSelected = el.classList.contains('selected');
+            
+            if (isSelected) {
+                currentModalOptions.modifiers.push({ id, name, price });
+            } else {
+                currentModalOptions.modifiers = currentModalOptions.modifiers.filter(m => m.id !== id);
+            }
+            updateModalPrice();
+        };
+
+        window.selectModalFulfillment = function(type) {
+            currentModalOptions.fulfillmentType = type;
+            document.querySelectorAll('#productModal .fulfillment-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // Show/hide pickup date based on fulfillment type
+            const pickupGroup = document.getElementById('pickupDateGroup');
+            if (pickupGroup) {
+                pickupGroup.style.display = type === 'PICKUP' ? 'block' : 'none';
+            }
+        };
+
+        window.updateModalPickup = function() {
+            const dateInput = document.getElementById('modalPickupDate');
+            if (dateInput && dateInput.value) {
+                currentModalOptions.pickupDate = dateInput.value;
+            }
+        };
+
+        function updateModalPrice() {
+            if (!currentModalProduct) return;
+            
+            let basePrice = currentModalProduct.price;
+            
+            // Get variation price if selected
+            const varSelect = document.getElementById('modalVariation');
+            if (varSelect) {
+                basePrice = parseInt(varSelect.options[varSelect.selectedIndex].dataset.price);
+            }
+            
+            // Add modifier prices
+            const modifierTotal = currentModalOptions.modifiers.reduce((sum, m) => sum + m.price, 0);
+            
+            // Calculate total
+            const unitPrice = basePrice + modifierTotal;
+            const total = unitPrice * currentModalOptions.quantity;
+            
+            modalPrice.textContent = '$' + (total / 100).toFixed(2);
+            document.getElementById('modalPriceDisplay').textContent = '$' + (unitPrice / 100).toFixed(2);
+        }
+
+        addToCartBtn.addEventListener('click', () => {
+            if (!currentModalProduct) return;
+            
+            // Get variation details
+            const varSelect = document.getElementById('modalVariation');
+            if (varSelect) {
+                const option = varSelect.options[varSelect.selectedIndex];
+                currentModalOptions.variationId = option.value;
+                currentModalOptions.variationName = option.dataset.name;
+            }
+            
+            // Build cart item
+            const basePrice = varSelect ? parseInt(varSelect.options[varSelect.selectedIndex].dataset.price) : currentModalProduct.price;
+            const modifierTotal = currentModalOptions.modifiers.reduce((sum, m) => sum + m.price, 0);
+            const unitPrice = basePrice + modifierTotal;
+            
+            const cartItem = {
+                id: currentModalProduct.id,
+                variationId: currentModalOptions.variationId,
+                variationName: currentModalOptions.variationName,
+                name: currentModalProduct.name,
+                description: currentModalProduct.description,
+                price: unitPrice,
+                modifiers: currentModalOptions.modifiers,
+                imageUrl: currentModalProduct.imageUrl,
+                quantity: currentModalOptions.quantity,
+                fulfillmentType: currentModalOptions.fulfillmentType,
+                pickupDate: currentModalOptions.pickupDate
+            };
+            
+            // Add to cart
+            cart.push(cartItem);
+            updateCart();
+            closeProductModal();
+            openCart();
+        });
+
+        window.openProductModal = openProductModal;
+
         // Load Products
         async function loadProducts() {
             try {
@@ -864,53 +1322,29 @@
                             : product.description
                         : '';
                     
-                    // Build variation selector if multiple variations exist
-                    let variationSelector = '';
-                    if (product.variations && product.variations.length > 1) {
-                        variationSelector = `
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-size: 0.85rem; color: var(--medium-brown); margin-bottom: 0.3rem;">Select Option:</label>
-                                <select id="var-${product.id}" class="option-select" style="width: 100%; padding: 0.5rem; border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;" onchange="updatePrice('${product.id}')">
-                                    ${product.variations.map((v, i) => `<option value="${v.id}" data-price="${v.price}" ${i === 0 ? 'selected' : ''}>${v.name} - $${(v.price / 100).toFixed(2)}</option>`).join('')}
-                                </select>
-                            </div>
-                        `;
-                    }
-                    
-                    // Build modifier selectors
-                    let modifierSelectors = '';
-                    if (product.modifiers && product.modifiers.length > 0) {
-                        modifierSelectors = product.modifiers.map(mod => `
-                            <div style="margin-bottom: 1rem;">
-                                <label style="display: block; font-size: 0.85rem; color: var(--medium-brown); margin-bottom: 0.3rem;">${mod.name}:</label>
-                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                    ${mod.options.map(opt => `
-                                        <label style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer; padding: 0.3rem 0.5rem; border: 1px solid rgba(212,175,55,0.3); border-radius: 4px;">
-                                            <input type="checkbox" name="mod-${product.id}-${mod.id}" value="${opt.id}" data-price="${opt.price}" data-name="${opt.name}">
-                                            ${opt.name}${opt.price > 0 ? ' (+$' + (opt.price / 100).toFixed(2) + ')' : ''}
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                    
-                    // Calculate initial price display
                     const basePrice = product.variations?.[0]?.price || product.price;
                     
+                    // Show option indicators
+                    let optionIndicators = '';
+                    if (product.variations && product.variations.length > 1) {
+                        optionIndicators += `<span style="font-size: 0.8rem; color: var(--accent-gold);">${product.variations.length} options available</span><br>`;
+                    }
+                    if (product.modifiers && product.modifiers.length > 0) {
+                        optionIndicators += `<span style="font-size: 0.8rem; color: var(--accent-gold);">+ Add-ons available</span>`;
+                    }
+                    
                     return `
-                    <div class="product-card" data-product-id="${product.id}" data-base-price="${basePrice}">
+                    <div class="product-card" style="cursor: pointer;" onclick='openProductModal("${product.id}")'>
                         <div class="product-image">
                             ${product.imageUrl ? `<img src="${product.imageUrl}" alt="${product.name}">` : 'Product Image'}
                         </div>
                         <div class="product-info">
                             <h3>${product.name}</h3>
                             <p style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-clamp: 2;">${shortDesc}</p>
-                            ${variationSelector}
-                            ${modifierSelectors}
-                            <div class="product-price" id="price-${product.id}">$${(basePrice / 100).toFixed(2)}</div>
-                            <button class="btn btn-primary" onclick='addToCartWithOptions("${product.id}")'>
-                                Add to Cart
+                            <div style="margin-bottom: 0.5rem;">${optionIndicators}</div>
+                            <div class="product-price">$${(basePrice / 100).toFixed(2)}</div>
+                            <button class="btn btn-primary" onclick='event.stopPropagation(); openProductModal("${product.id}")'>
+                                Select Options
                             </button>
                         </div>
                     </div>
