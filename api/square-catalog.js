@@ -122,10 +122,6 @@ module.exports = async (req, res) => {
           price = Number(variationData.priceMoney.amount);
         }
         
-        // Build Square Online Store URL for direct checkout
-        // Format: https://[merchant-name].square.site/product/[item-id]
-        const squareOnlineUrl = `https://www.asliceofg.com/shop/${categoryName.toLowerCase().replace(/\s+/g, '-')}/${item.id}`;
-        
         const product = {
           id: item.id,
           name: itemData.name || 'Unnamed Product',
@@ -134,9 +130,7 @@ module.exports = async (req, res) => {
           currency: variationData.priceMoney ? variationData.priceMoney.currency : 'USD',
           category: categoryName,
           imageUrl: imageUrl,
-          available: !isDeleted && availableOnline,
-          squareUrl: squareOnlineUrl,
-          variationId: variation ? variation.id : null
+          available: !isDeleted && availableOnline
         };
         
         allItems.push(product);

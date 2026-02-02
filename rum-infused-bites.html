@@ -247,7 +247,6 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="rum-infused-bites.html">Rum Infused Bites</a></li>
                 <li><a href="accessories.html">Accessories</a></li>
-                <li><a href="https://www.asliceofg.com/account/login" target="_blank">My Account</a></li>
                 <li><a href="index.html#about">About</a></li>
                 <li><a href="index.html#contact">Contact</a></li>
                 <li><a href="#" id="cartIcon">🛒 <span id="cartCount">0</span></a></li>
@@ -406,8 +405,7 @@
                             <h3>${product.name}</h3>
                             <p>${product.description || ''}</p>
                             <div class="product-price">$${(product.price / 100).toFixed(2)}</div>
-                            <a href="${product.squareUrl}" target="_blank" class="btn btn-primary" style="display: inline-block; text-align: center; width: 100%;">Buy on Square</a>
-                            <p style="font-size: 0.8rem; color: #999; margin-top: 0.5rem; text-align: center;">Choose shipping or pickup at checkout</p>
+                            <button class="btn btn-primary" onclick='addToCart(${JSON.stringify(product).replace(/'/g, "&#39;")})'>Add to Cart</button>
                         </div>
                     </div>
                 `).join('');
